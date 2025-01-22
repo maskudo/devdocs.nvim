@@ -3,23 +3,13 @@ local uv = vim.uv
 local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
 local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
 local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
+local helper = require('devdocs.helpers')
 
 vim.notify(DEVDOCS_DATA_DIR .. METADATA_FILE)
 M.InitializeDirectories = function()
-  local dataDirExists = uv.fs_stat(DEVDOCS_DATA_DIR)
-  local docsDirExists = uv.fs_stat(DOCS_DIR)
-  if not dataDirExists then
-    local res = uv.fs_mkdir(DEVDOCS_DATA_DIR, 511) -- 511 is octal for 0777
-    if not res then
-      vim.notify('Error creating data directory', vim.log.levels.ERROR)
-    end
-  end
-  if not docsDirExists then
-    local res = uv.fs_mkdir(DOCS_DIR, 511) -- 511 is octal for 0777
-    if not res then
-      vim.notify('Error creating data directory', vim.log.levels.ERROR)
-    end
-  end
+  local dataDirExists = helper.CreateDirIfNotExists(DEVDOCS_DATA_DIR)
+  local docsDirExists = helper.CreateDirIfNotExists(DOCS_DIR)
+  assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
 M.FetchDevdocsMetadata = function()
