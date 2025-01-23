@@ -1,11 +1,9 @@
 local M = {}
-local uv = vim.uv
 local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
 local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
 local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
 local helper = require('devdocs.helpers')
 
-vim.notify(DEVDOCS_DATA_DIR .. METADATA_FILE)
 M.InitializeDirectories = function()
   local dataDirExists = helper.CreateDirIfNotExists(DEVDOCS_DATA_DIR)
   local docsDirExists = helper.CreateDirIfNotExists(DOCS_DIR)
@@ -31,15 +29,25 @@ end
 M.ShowAvailableDocs = function()
   local file = io.open(METADATA_FILE, 'r')
   if not file then
-    return vim.notify('No available docs. Use DevDocsFetch to fetch them.')
+    vim.notify('No available docs. Use DevDocsFetch to fetch them.')
+    return {}
   end
   local text = file:read('*a')
-  local availableDocs =
-    vim.json.decode(text, { luanil = {
-      array = true,
-      object = true,
-    } })
-  vim.notify(vim.inspect(availableDocs[1]))
+  local availableDocs = vim.json.decode(text)
+  return availableDocs
+end
+
+M.PickDocs = function()
+  local docs = M.ShowAvailableDocs()
+  local names = {}
+  for _, doc in ipairs(docs) do
+    table.insert(names, doc.slug)
+  end
+  vim.ui.select(names, { prompt = 'Select docs to install' }, function(choice)
+    print(choice)
+  end)
+end
+
 end
 
 return M
