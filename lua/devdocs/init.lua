@@ -4,12 +4,14 @@ local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
 local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
 local helper = require('devdocs.helpers')
 
+---Initialize DevDocs directories
 M.InitializeDirectories = function()
   local dataDirExists = helper.CreateDirIfNotExists(DEVDOCS_DATA_DIR)
   local docsDirExists = helper.CreateDirIfNotExists(DOCS_DIR)
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
+---Fetches and stores metadata in ${DEVDOCS_DATA_DIR}/metadata.json
 M.FetchDevdocsMetadata = function()
   vim.system({
     'curl',
@@ -26,6 +28,8 @@ M.FetchDevdocsMetadata = function()
   end)
 end
 
+---Returns available dev docs
+---@return table
 M.ShowAvailableDocs = function()
   local file = io.open(METADATA_FILE, 'r')
   if not file then
@@ -48,6 +52,27 @@ M.PickDocs = function()
   end)
 end
 
+M.DownloadDocs = function(slug)
+  local downloadLink = 'https://documents.devdocs.io/' .. slug .. '/db.json'
+  vim.system({
+    'curl',
+    '-s',
+    downloadLink,
+  }, { text = false }, function(res)
+    assert(res.code == 0, 'Error downloading docs')
+    vim.system({
+      'jq',
+      '-c',
+      'to_entries[]',
+    }, { test = false, stdin = res.stdout }, function(ndjson)
+      assert(ndjson.code == 0, 'Error processing json')
+      local f = io.open(DOCS_DIR .. '/' .. slug .. '.json', 'w')
+      assert(f, 'Error creating file for ' .. slug)
+      local _, err = f:write(ndjson.stdout)
+      assert(not err, 'Error writing')
+      f:close()
+    end)
+  end)
 end
 
 return M
