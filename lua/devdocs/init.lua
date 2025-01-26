@@ -71,8 +71,38 @@ M.DownloadDocs = function(slug)
       local _, err = f:write(ndjson.stdout)
       assert(not err, 'Error writing')
       f:close()
+      vim.notify('Downloaded docs for ' .. slug .. ' successfully', vim.log.levels.INFO)
     end)
   end)
 end
 
+M.ExtractDocs = function(slug)
+  local filepath = DOCS_DIR .. '/' .. slug .. '.json'
+  for line in io.lines(filepath) do
+    local entry =
+      vim.json.decode(line, { luanil = {
+        object = true,
+        array = true,
+      } })
+    local title = entry.key
+    local htmlContent = entry.value
+    local parts = vim.split(title, '/', { trimempty = true, plain = true })
+    local filename = table.remove(parts, #parts) .. '.md'
+    local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+    local outputFile = dir .. '/' .. filename
+
+    vim.fn.mkdir(dir, 'p')
+    vim.system({
+      'pandoc',
+      '-f',
+      'html',
+      '-t',
+      'markdown',
+      '-o',
+      outputFile,
+    }, { stdin = htmlContent }, function(res)
+      assert(res.code == 0, 'Error converting to markdown:', res.stderr)
+    end)
+  end
+end
 return M
