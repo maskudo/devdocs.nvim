@@ -2,12 +2,13 @@ local M = {}
 local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
 local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
 local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
-local helper = require('devdocs.helpers')
 
 ---Initialize DevDocs directories
 M.InitializeDirectories = function()
-  local dataDirExists = helper.CreateDirIfNotExists(DEVDOCS_DATA_DIR)
-  local docsDirExists = helper.CreateDirIfNotExists(DOCS_DIR)
+  os.execute('mkdir -p ' .. DEVDOCS_DATA_DIR)
+  os.execute('mkdir -p ' .. DOCS_DIR)
+  local dataDirExists = vim.fn.mkdir(DEVDOCS_DATA_DIR, 'p')
+  local docsDirExists = vim.fn.mkdir(DOCS_DIR, 'p')
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
