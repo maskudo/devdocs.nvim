@@ -78,31 +78,67 @@ end
 
 M.ExtractDocs = function(slug)
   local filepath = DOCS_DIR .. '/' .. slug .. '.json'
-  for line in io.lines(filepath) do
-    local entry =
-      vim.json.decode(line, { luanil = {
-        object = true,
-        array = true,
-      } })
-    local title = entry.key
-    local htmlContent = entry.value
-    local parts = vim.split(title, '/', { trimempty = true, plain = true })
-    local filename = table.remove(parts, #parts) .. '.md'
-    local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
-    local outputFile = dir .. '/' .. filename
 
-    vim.fn.mkdir(dir, 'p')
-    vim.system({
-      'pandoc',
-      '-f',
-      'html',
-      '-t',
-      'markdown',
-      '-o',
-      outputFile,
-    }, { stdin = htmlContent }, function(res)
-      assert(res.code == 0, 'Error converting to markdown:', res.stderr)
-    end)
+  local activeJobs = 0
+  local MAX_ACTIVE_JOBS = 20
+
+  local getDocsData = coroutine.create(function()
+    for line in io.lines(filepath) do
+      local entry = vim.json.decode(
+        line,
+        { luanil = {
+          object = true,
+          array = true,
+        } }
+      )
+      local title = entry.key
+      local htmlContent = entry.value
+      local parts = vim.split(title, '/', { trimempty = true, plain = true })
+      local filename = table.remove(parts, #parts) .. '.md'
+      local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+      local outputFile = dir .. '/' .. filename
+
+      os.execute('mkdir -p ' .. dir)
+      coroutine.yield({ outputFile = outputFile, htmlContent = htmlContent })
+    end
+  end)
+  local function processDocs()
+    if activeJobs <= MAX_ACTIVE_JOBS and coroutine.status(getDocsData) ~= 'dead' then
+      local success, job = coroutine.resume(getDocsData)
+      if success and job then
+        activeJobs = activeJobs + 1
+        M.ConvertHtmlToMarkdown(job.htmlContent, job.outputFile, function()
+          activeJobs = activeJobs - 1
+          vim.defer_fn(processDocs, 0)
+        end)
+      end
+    elseif coroutine.status(getDocsData) == 'dead' then
+      if activeJobs == 0 then
+        print('Documents for ' .. slug .. ' extracted successfully')
+      end
+    else
+      vim.defer_fn(processDocs, 0)
+    end
+  end
+
+  for _ = 1, MAX_ACTIVE_JOBS do
+    processDocs()
   end
 end
+
+M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
+  vim.system({
+    'pandoc',
+    '-f',
+    'html',
+    '-t',
+    'markdown',
+    '-o',
+    outputFile,
+  }, { stdin = htmlContent }, function(res)
+    callback()
+    assert(res.code == 0, 'Error converting to markdown:', res.stderr)
+  end)
+end
+
 return M
