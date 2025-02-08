@@ -22,21 +22,28 @@ local function initializeState()
     state = vim.json.decode(s)
   end
   M.state = state
-  M.stateFile = stateFile
 end
 
 M.Update = function(self, key, val)
   self.state[key] = val
   local encoded = vim.json.encode(self.state)
-  self.stateFile:write(encoded)
-  self.stateFile:flush()
+  local stateFile = io.open(STATE_FILE, 'w+')
+  if not stateFile then
+    error('Error updating devdocs state', vim.log.levels.ERROR)
+  end
+  stateFile:write(encoded)
+  stateFile:flush()
 end
 
 M.Reset = function(self)
   self.state = {}
   local encoded = vim.json.encode(self.state)
-  self.stateFile:write(encoded)
-  self.stateFile:flush()
+  local stateFile = io.open(STATE_FILE, 'w+')
+  if not stateFile then
+    error('Error updating devdocs state', vim.log.levels.ERROR)
+  end
+  stateFile:write(encoded)
+  stateFile:flush()
 end
 
 M.Get = function(self, key)
