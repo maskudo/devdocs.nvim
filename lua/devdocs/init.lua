@@ -2,7 +2,6 @@ local M = {}
 local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
 local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
 local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
-local STATE = require('devdocs.state')
 
 ---Initialize DevDocs directories
 M.InitializeDirectories = function()
@@ -14,7 +13,7 @@ M.InitializeDirectories = function()
 end
 
 M.InitializeMetadata = function()
-  local metadata = STATE:Get('metadata')
+  local metadata = require('devdocs.state'):Get('metadata')
   if metadata and metadata.downloaded then
     return
   end
@@ -31,7 +30,7 @@ M.FetchDevdocsMetadata = function()
     METADATA_FILE,
   }, { text = false }, function(res)
     if res.code == 0 then
-      STATE:Update('metadata', {
+      require('devdocs.state'):Update('metadata', {
         downloaded = true,
       })
     else
@@ -83,7 +82,7 @@ M.DownloadDocs = function(slug, onDownload)
       local _, err = f:write(ndjson.stdout)
       assert(not err, 'Error writing')
       f:close()
-      STATE:Update(slug, {
+      require('devdocs.state'):Update(slug, {
         downloaded = true,
       })
       onDownload()
@@ -92,7 +91,7 @@ M.DownloadDocs = function(slug, onDownload)
 end
 
 M.ShowState = function()
-  print(vim.inspect(STATE.state))
+  print(vim.inspect(require('devdocs.state').state))
 end
 
 M.ExtractDocs = function(slug)
@@ -134,7 +133,7 @@ M.ExtractDocs = function(slug)
     elseif coroutine.status(getDocsData) == 'dead' then
       if activeJobs == 0 then
         print('Documents for ' .. slug .. ' extracted successfully')
-        STATE:Update(slug, {
+        require('devdocs.state'):Update(slug, {
           downloaded = true,
           extracted = true,
         })
@@ -171,8 +170,13 @@ M.DownloadAndExtractDocs = function(slug)
 end
 
 M.GetDocStatus = function(slug)
-  local status = STATE:Get(slug)
+  local status = require('devdocs.state'):Get(slug)
   return status
+end
+
+M.setup = function(opts)
+  M.InitializeDirectories()
+  M.InitializeMetadata()
 end
 
 return M
