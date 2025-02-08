@@ -1,0 +1,48 @@
+local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
+local STATE_FILE = DEVDOCS_DATA_DIR .. '/state.json'
+
+local M = {}
+
+M.initializeState = function(self)
+  local statefileInfo = vim.uv.fs_stat(STATE_FILE)
+  local stateFile
+  if statefileInfo then
+    stateFile = io.open(STATE_FILE, 'r+')
+  else
+    stateFile = io.open(STATE_FILE, 'w+')
+  end
+  if not stateFile then
+    error('Error initializing Devdocs state', vim.log.levels.ERROR)
+  end
+  -- reading all at once should be fine since it should be a small file < 1MB
+  local s = stateFile:read('*a')
+  local state = {}
+
+  if #s > 0 then
+    state = vim.json.decode(s)
+  end
+  self.state = state
+  self.stateFile = stateFile
+end
+
+M.Update = function(self, key, val)
+  self.state[key] = val
+  local encoded = vim.json.encode(self.state)
+  self.stateFile:write(encoded)
+  self.stateFile:flush()
+end
+
+M.Reset = function(self)
+  self.state = {}
+  local encoded = vim.json.encode(self.state)
+  self.stateFile:write(encoded)
+  self.stateFile:flush()
+end
+
+M.Get = function(self, key)
+  return self.state[key]
+end
+
+M:initializeState()
+
+return M
