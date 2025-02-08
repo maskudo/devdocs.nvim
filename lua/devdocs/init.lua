@@ -83,9 +83,16 @@ M.DownloadDocs = function(slug, onDownload)
       local _, err = f:write(ndjson.stdout)
       assert(not err, 'Error writing')
       f:close()
+      STATE:Update(slug, {
+        downloaded = true,
+      })
       onDownload()
     end)
   end)
+end
+
+M.ShowState = function()
+  print(vim.inspect(STATE.state))
 end
 
 M.ExtractDocs = function(slug)
@@ -127,6 +134,10 @@ M.ExtractDocs = function(slug)
     elseif coroutine.status(getDocsData) == 'dead' then
       if activeJobs == 0 then
         print('Documents for ' .. slug .. ' extracted successfully')
+        STATE:Update(slug, {
+          downloaded = true,
+          extracted = true,
+        })
       end
     else
       vim.defer_fn(processDocs, 0)
@@ -151,6 +162,17 @@ M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
     callback()
     assert(res.code == 0, 'Error converting to markdown:', res.stderr)
   end)
+end
+
+M.DownloadAndExtractDocs = function(slug)
+  M.DownloadDocs(slug, function()
+    M.ExtractDocs(slug)
+  end)
+end
+
+M.GetDocStatus = function(slug)
+  local status = STATE:Get(slug)
+  return status
 end
 
 return M
