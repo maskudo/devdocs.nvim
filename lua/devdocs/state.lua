@@ -3,7 +3,7 @@ local STATE_FILE = DEVDOCS_DATA_DIR .. '/state.json'
 
 local M = {}
 
-M.initializeState = function(self)
+local function initializeState()
   local statefileInfo = vim.uv.fs_stat(STATE_FILE)
   local stateFile
   if statefileInfo then
@@ -21,8 +21,8 @@ M.initializeState = function(self)
   if #s > 0 then
     state = vim.json.decode(s)
   end
-  self.state = state
-  self.stateFile = stateFile
+  M.state = state
+  M.stateFile = stateFile
 end
 
 M.Update = function(self, key, val)
@@ -43,6 +43,6 @@ M.Get = function(self, key)
   return self.state[key]
 end
 
-M:initializeState()
+initializeState()
 
 return M
