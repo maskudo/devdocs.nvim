@@ -41,7 +41,7 @@ end
 
 ---Returns available dev docs
 ---@return table
-M.ShowAvailableDocs = function()
+M.GetAvailableDocs = function()
   local file = io.open(METADATA_FILE, 'r')
   if not file then
     vim.notify('No available docs. Use DevDocsFetch to fetch them.')
@@ -53,7 +53,7 @@ M.ShowAvailableDocs = function()
 end
 
 M.PickDocs = function()
-  local docs = M.ShowAvailableDocs()
+  local docs = M.GetAvailableDocs()
   local names = {}
   for _, doc in ipairs(docs) do
     table.insert(names, doc.slug)
@@ -174,10 +174,41 @@ M.GetDocStatus = function(slug)
   return status
 end
 
+local function GetDocsSet()
+  local availableDocs = M.GetAvailableDocs()
+  local set = {}
+  for _, doc in ipairs(availableDocs) do
+    set[doc.slug] = true
+  end
+  return set
+end
+
+local function ValidateDocsAvailability(docs)
+  local availableDocs = GetDocsSet()
+  local invalidDocs = {}
+  local validDocs = {}
+  for _, doc in ipairs(docs) do
+    if availableDocs[doc] == true then
+      table.insert(validDocs, doc)
+    else
+      table.insert(invalidDocs, doc)
+    end
+  end
+  return { validDocs = validDocs, invalidDocs = invalidDocs }
+end
+
 M.setup = function(opts)
   M.InitializeDirectories()
   M.InitializeMetadata()
-  local toInstall = opts.ensure_installed or {}
+  local ensureInstalled = opts.ensure_installed or {}
+  local validatedDocs = ValidateDocsAvailability(ensureInstalled)
+  local toInstall = validatedDocs.validDocs
+  vim.notify(
+    '[[DEVDOCS.NVIM]] Following docs are not available and will not be installed: \n'
+      .. vim.fn.join(validatedDocs.invalidDocs, '\n')
+      .. '\nPlease remove them from opts',
+    vim.log.levels.WARN
+  )
   local downloadList = {}
   local extractList = {}
   for _, doc in ipairs(toInstall) do
@@ -198,9 +229,8 @@ M.setup = function(opts)
       M.ExtractDocs(doc, function()
         if coroutine.status(extractJob) ~= 'dead' then
           vim.defer_fn(function()
-          coroutine.resume(extractJob)
+            coroutine.resume(extractJob)
           end, 0)
-          
         end
       end)
       if i == #extractList then
@@ -217,7 +247,7 @@ M.setup = function(opts)
         table.insert(extractList, doc)
         if coroutine.status(downloadJob) ~= 'dead' then
           vim.defer_fn(function()
-          coroutine.resume(downloadJob)
+            coroutine.resume(downloadJob)
           end, 0)
         end
       end)
