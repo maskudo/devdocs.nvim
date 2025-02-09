@@ -75,6 +75,10 @@ M.setup = function(opts)
   if coroutine.status(downloadJob) ~= 'dead' then
     coroutine.resume(downloadJob)
   end
+  -- extract if nothing to download
+  if #downloadList == 0 and #extractList > 0 and coroutine.status(extractJob) ~= 'dead' then
+    coroutine.resume(extractJob)
+  end
 end
 
 return M
