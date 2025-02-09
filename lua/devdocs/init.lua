@@ -1,10 +1,7 @@
 local M = {}
 local D = require('devdocs.docs')
 
-M.setup = function(opts)
-  D.InitializeDirectories()
-  D.InitializeMetadata()
-  local ensureInstalled = opts.ensure_installed or {}
+local function downloadDocs(ensureInstalled)
   local validatedDocs = D.ValidateDocsAvailability(ensureInstalled)
   local toInstall = validatedDocs.validDocs
   if #validatedDocs.invalidDocs > 0 then
@@ -15,7 +12,7 @@ M.setup = function(opts)
       vim.log.levels.WARN
     )
   end
-  if not toInstall then
+  if #toInstall == 0 then
     return
   end
   local downloadList = {}
@@ -85,4 +82,9 @@ M.setup = function(opts)
   end
 end
 
+M.setup = function(opts)
+  D.InitializeDirectories()
+  D.InitializeMetadata()
+  local ensureInstalled = opts.ensure_installed or {}
+  downloadDocs(ensureInstalled)
 return M
