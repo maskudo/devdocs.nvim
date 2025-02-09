@@ -35,7 +35,9 @@ M.setup = function(opts)
   local extractJob
   extractJob = coroutine.create(function()
     for i, doc in ipairs(extractList) do
+      print('Extracting DevDocs for ' .. doc)
       D.ExtractDocs(doc, function()
+        print('Docs for ' .. doc .. ' extracted successfully')
         if coroutine.status(extractJob) ~= 'dead' then
           vim.defer_fn(function()
             coroutine.resume(extractJob)
@@ -52,8 +54,10 @@ M.setup = function(opts)
   local downloadJob
   downloadJob = coroutine.create(function()
     for i, doc in ipairs(downloadList) do
+      print('Downloading DevDocs for ' .. doc)
       D.DownloadDocs(doc, function()
         table.insert(extractList, doc)
+        print('Docs for ' .. doc .. ' downloaded successfully')
         if coroutine.status(downloadJob) ~= 'dead' then
           vim.defer_fn(function()
             coroutine.resume(downloadJob)
