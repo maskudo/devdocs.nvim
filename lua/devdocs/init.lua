@@ -87,4 +87,18 @@ M.setup = function(opts)
   D.InitializeMetadata()
   local ensureInstalled = opts.ensure_installed or {}
   downloadDocs(ensureInstalled)
+  vim.api.nvim_create_user_command('DevDocs', function(opts)
+    local subcmd = opts.fargs[1]
+    if subcmd == 'fetch' then
+      D.InitializeMetadata({ force = true })
+    elseif subcmd == 'install' then
+      local doc = opts.fargs[2]
+      if not D.ValidateDocAvailability(doc) then
+        return vim.notify('Docs for ' .. doc .. " doesn't exist", vim.log.levels.ERROR)
+      end
+      D.DownloadDocs(doc)
+    end
+  end, { nargs = '+' })
+end
+
 return M

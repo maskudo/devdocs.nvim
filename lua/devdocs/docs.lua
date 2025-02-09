@@ -12,7 +12,10 @@ M.InitializeDirectories = function()
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
-M.InitializeMetadata = function()
+M.InitializeMetadata = function(opts)
+  if opts and opts.force then
+    return M.FetchDevdocsMetadata()
+  end
   local metadata = require('devdocs.state'):Get('metadata')
   if metadata and metadata.downloaded then
     return
@@ -181,6 +184,11 @@ M.GetDocsSet = function()
     set[doc.slug] = true
   end
   return set
+end
+
+M.ValidateDocAvailability = function(doc)
+  local availableDocs = M.GetDocsSet()
+  return availableDocs[doc] or false
 end
 
 M.ValidateDocsAvailability = function(docs)
