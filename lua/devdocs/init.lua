@@ -76,7 +76,7 @@ M.DownloadDocs = function(slug, onDownload)
       '-c',
       'to_entries[]',
     }, { test = false, stdin = res.stdout }, function(ndjson)
-      assert(ndjson.code == 0, 'Error processing json')
+      assert(ndjson.code == 0, 'Error processing json for ' .. slug)
       local f = io.open(DOCS_DIR .. '/' .. slug .. '.json', 'w')
       assert(f, 'Error creating file for ' .. slug)
       local _, err = f:write(ndjson.stdout)
@@ -94,7 +94,7 @@ M.ShowState = function()
   print(vim.inspect(require('devdocs.state').state))
 end
 
-M.ExtractDocs = function(slug)
+M.ExtractDocs = function(slug, onComplete)
   local filepath = DOCS_DIR .. '/' .. slug .. '.json'
 
   local activeJobs = 0
@@ -132,11 +132,11 @@ M.ExtractDocs = function(slug)
       end
     elseif coroutine.status(getDocsData) == 'dead' then
       if activeJobs == 0 then
-        print('Documents for ' .. slug .. ' extracted successfully')
         require('devdocs.state'):Update(slug, {
           downloaded = true,
           extracted = true,
         })
+        onComplete()
       end
     else
       vim.defer_fn(processDocs, 0)
@@ -177,6 +177,65 @@ end
 M.setup = function(opts)
   M.InitializeDirectories()
   M.InitializeMetadata()
+  local toInstall = opts.ensure_installed or {}
+  local downloadList = {}
+  local extractList = {}
+  for _, doc in ipairs(toInstall) do
+    local status = M.GetDocStatus(doc)
+    if not status or not status.downloaded then
+      table.insert(downloadList, doc)
+    elseif status.downloaded and not status.extracted then
+      table.insert(extractList, doc)
+    end
+  end
+  if #downloadList == 0 and #extractList == 0 then
+    return
+  end
+
+  local extractJob
+  extractJob = coroutine.create(function()
+    for i, doc in ipairs(extractList) do
+      M.ExtractDocs(doc, function()
+        if coroutine.status(extractJob) ~= 'dead' then
+          vim.defer_fn(function()
+          coroutine.resume(extractJob)
+          end, 0)
+          
+        end
+      end)
+      if i == #extractList then
+        return
+      end
+      coroutine.yield()
+    end
+  end)
+
+  local downloadJob
+  downloadJob = coroutine.create(function()
+    for i, doc in ipairs(downloadList) do
+      M.DownloadDocs(doc, function()
+        table.insert(extractList, doc)
+        if coroutine.status(downloadJob) ~= 'dead' then
+          vim.defer_fn(function()
+          coroutine.resume(downloadJob)
+          end, 0)
+        end
+      end)
+      if i == #downloadList then
+        if coroutine.status(extractJob) ~= 'dead' then
+          vim.defer_fn(function()
+            coroutine.resume(extractJob)
+          end, 0)
+        end
+        return
+      end
+      coroutine.yield()
+    end
+  end)
+
+  if coroutine.status(downloadJob) ~= 'dead' then
+    coroutine.resume(downloadJob)
+  end
 end
 
 return M
