@@ -21,7 +21,7 @@ local gen_items = function(docs)
 end
 
 M.PickDocs = function()
-  local docs = D.GetAvailableDocs()
+  local docs = D.GetDownloadableDocs()
   local items = gen_items(docs)
   S.picker.pick({
     source = 'devdocs',

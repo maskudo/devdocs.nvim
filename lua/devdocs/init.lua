@@ -91,7 +91,7 @@ M.setup = function(opt)
   vim.api.nvim_create_user_command('DevDocs', function(opts)
     local subcmd = opts.fargs[1]
     if not subcmd then
-      print('Available cmd: fetch, install, get')
+      vim.notify('[[DevDocs.nvim]] Available cmd: fetch, install, get', vim.log.levels.INFO)
     end
     if subcmd == 'fetch' then
       D.InitializeMetadata({ force = true })

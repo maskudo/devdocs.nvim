@@ -42,7 +42,7 @@ end
 
 ---Returns available dev docs
 ---@return table
-M.GetAvailableDocs = function()
+M.GetDownloadableDocs = function()
   local file = io.open(C.METADATA_FILE, 'r')
   if not file then
     vim.notify('No available docs. Use DevDocsFetch to fetch them.')
@@ -54,7 +54,7 @@ M.GetAvailableDocs = function()
 end
 
 M.PickDocs = function()
-  local docs = M.GetAvailableDocs()
+  local docs = M.GetDownloadableDocs()
   local names = {}
   for _, doc in ipairs(docs) do
     table.insert(names, doc.slug)
@@ -114,7 +114,7 @@ M.ExtractDocs = function(slug, onComplete)
       local htmlContent = entry.value
       local parts = vim.split(title, '/', { trimempty = true, plain = true })
       local filename = table.remove(parts, #parts) .. '.md'
-      local dir = C.DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+      local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
       local outputFile = dir .. '/' .. filename
 
       os.execute('mkdir -p ' .. dir)
@@ -175,8 +175,8 @@ M.GetDocStatus = function(slug)
   return status
 end
 
-M.GetDocsSet = function()
-  local availableDocs = M.GetAvailableDocs()
+M.GetAvailableDocs = function()
+  local availableDocs = M.GetDownloadableDocs()
   local set = {}
   for _, doc in ipairs(availableDocs) do
     set[doc.slug] = true
@@ -185,12 +185,12 @@ M.GetDocsSet = function()
 end
 
 M.ValidateDocAvailability = function(doc)
-  local availableDocs = M.GetDocsSet()
+  local availableDocs = M.GetAvailableDocs()
   return availableDocs[doc] or false
 end
 
 M.ValidateDocsAvailability = function(docs)
-  local availableDocs = M.GetDocsSet()
+  local availableDocs = M.GetAvailableDocs()
   local invalidDocs = {}
   local validDocs = {}
   for _, doc in ipairs(docs) do
