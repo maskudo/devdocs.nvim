@@ -1,14 +1,12 @@
 local M = {}
-local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
-local METADATA_FILE = DEVDOCS_DATA_DIR .. '/metadata.json'
-local DOCS_DIR = DEVDOCS_DATA_DIR .. '/docs'
+local C = require('devdocs.constants')
 
 ---Initialize DevDocs directories
 M.InitializeDirectories = function()
-  os.execute('mkdir -p ' .. DEVDOCS_DATA_DIR)
-  os.execute('mkdir -p ' .. DOCS_DIR)
-  local dataDirExists = vim.fn.mkdir(DEVDOCS_DATA_DIR, 'p')
-  local docsDirExists = vim.fn.mkdir(DOCS_DIR, 'p')
+  os.execute('mkdir -p ' .. C.DEVDOCS_DATA_DIR)
+  os.execute('mkdir -p ' .. C.DOCS_DIR)
+  local dataDirExists = vim.fn.mkdir(C.DEVDOCS_DATA_DIR, 'p')
+  local docsDirExists = vim.fn.mkdir(C.DOCS_DIR, 'p')
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
@@ -30,7 +28,7 @@ M.FetchDevdocsMetadata = function()
     '-s',
     'https://documents.devdocs.io/docs.json',
     '-o',
-    METADATA_FILE,
+    C.METADATA_FILE,
   }, { text = false }, function(res)
     if res.code == 0 then
       require('devdocs.state'):Update('metadata', {
@@ -45,7 +43,7 @@ end
 ---Returns available dev docs
 ---@return table
 M.GetAvailableDocs = function()
-  local file = io.open(METADATA_FILE, 'r')
+  local file = io.open(C.METADATA_FILE, 'r')
   if not file then
     vim.notify('No available docs. Use DevDocsFetch to fetch them.')
     return {}
@@ -80,7 +78,7 @@ M.DownloadDocs = function(slug, onDownload)
       'to_entries[]',
     }, { test = false, stdin = res.stdout }, function(ndjson)
       assert(ndjson.code == 0, 'Error processing json for ' .. slug)
-      local f = io.open(DOCS_DIR .. '/' .. slug .. '.json', 'w')
+      local f = io.open(C.DOCS_DIR .. '/' .. slug .. '.json', 'w')
       assert(f, 'Error creating file for ' .. slug)
       local _, err = f:write(ndjson.stdout)
       assert(not err, 'Error writing')
@@ -98,7 +96,7 @@ M.ShowState = function()
 end
 
 M.ExtractDocs = function(slug, onComplete)
-  local filepath = DOCS_DIR .. '/' .. slug .. '.json'
+  local filepath = C.DOCS_DIR .. '/' .. slug .. '.json'
 
   local activeJobs = 0
   local MAX_ACTIVE_JOBS = 20
@@ -116,7 +114,7 @@ M.ExtractDocs = function(slug, onComplete)
       local htmlContent = entry.value
       local parts = vim.split(title, '/', { trimempty = true, plain = true })
       local filename = table.remove(parts, #parts) .. '.md'
-      local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+      local dir = C.DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
       local outputFile = dir .. '/' .. filename
 
       os.execute('mkdir -p ' .. dir)
