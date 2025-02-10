@@ -1,5 +1,6 @@
 local M = {}
 local D = require('devdocs.docs')
+local P = require('devdocs.picker')
 
 local function downloadDocs(ensureInstalled)
   local validatedDocs = D.ValidateDocsAvailability(ensureInstalled)
@@ -82,13 +83,16 @@ local function downloadDocs(ensureInstalled)
   end
 end
 
-M.setup = function(opts)
+M.setup = function(opt)
   D.InitializeDirectories()
   D.InitializeMetadata()
-  local ensureInstalled = opts.ensure_installed or {}
+  local ensureInstalled = opt.ensure_installed or {}
   downloadDocs(ensureInstalled)
   vim.api.nvim_create_user_command('DevDocs', function(opts)
     local subcmd = opts.fargs[1]
+    if not subcmd then
+      print('Available cmd: fetch, install, get')
+    end
     if subcmd == 'fetch' then
       D.InitializeMetadata({ force = true })
     elseif subcmd == 'install' then
@@ -97,8 +101,15 @@ M.setup = function(opts)
         return vim.notify('Docs for ' .. doc .. " doesn't exist", vim.log.levels.ERROR)
       end
       D.DownloadDocs(doc)
+    elseif subcmd == 'get' then
+      local doc = opts.fargs[2]
+      if not doc then
+        P.PickDocs()
+      else
+        P.PickDoc(doc)
+      end
     end
-  end, { nargs = '+' })
+  end, { nargs = '*' })
 end
 
 return M
