@@ -35,7 +35,6 @@ local function downloadDocs(ensureInstalled)
     for i, doc in ipairs(toExtract) do
       print('Extracting DevDocs for ' .. doc)
       D.ExtractDocs(doc, function()
-        print('Docs for ' .. doc .. ' extracted successfully')
         if coroutine.status(extractJob) ~= 'dead' then
           vim.defer_fn(function()
             coroutine.resume(extractJob, toExtract)
@@ -83,11 +82,7 @@ local function downloadDocs(ensureInstalled)
   end
 end
 
-M.setup = function(opt)
-  D.InitializeDirectories()
-  D.InitializeMetadata()
-  local ensureInstalled = opt.ensure_installed or {}
-  downloadDocs(ensureInstalled)
+local function setupCommands(opts)
   vim.api.nvim_create_user_command('DevDocs', function(opts)
     local subcmd = opts.fargs[1]
     if not subcmd then
@@ -110,6 +105,15 @@ M.setup = function(opt)
       end
     end
   end, { nargs = '*' })
+end
+
+M.setup = function(opts)
+  D.InitializeDirectories()
+  D.InitializeMetadata({}, function()
+    local ensureInstalled = opts.ensure_installed or {}
+    downloadDocs(ensureInstalled)
+  end)
+  setupCommands(opts)
 end
 
 return M

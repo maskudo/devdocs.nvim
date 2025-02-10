@@ -10,19 +10,21 @@ M.InitializeDirectories = function()
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
-M.InitializeMetadata = function(opts)
+M.InitializeMetadata = function(opts, onComplete)
   if opts and opts.force then
-    return M.FetchDevdocsMetadata()
+    return M.FetchDevdocsMetadata(onComplete)
   end
   local metadata = require('devdocs.state'):Get('metadata')
   if metadata and metadata.downloaded then
-    return
+    if onComplete ~= nil then
+      onComplete()
+    end
   end
-  M.FetchDevdocsMetadata()
+  M.FetchDevdocsMetadata(onComplete)
 end
 
 ---Fetches and stores metadata in ${DEVDOCS_DATA_DIR}/metadata.json
-M.FetchDevdocsMetadata = function()
+M.FetchDevdocsMetadata = function(onComplete)
   vim.system({
     'curl',
     '-s',
@@ -34,6 +36,9 @@ M.FetchDevdocsMetadata = function()
       require('devdocs.state'):Update('metadata', {
         downloaded = true,
       })
+      if onComplete ~= nil then
+        onComplete()
+      end
     else
       print('Error Downloading metadata')
     end
@@ -137,6 +142,7 @@ M.ExtractDocs = function(slug, onComplete)
           downloaded = true,
           extracted = true,
         })
+        vim.notify('Extracted Docs for ' .. slug .. 'successfully')
         onComplete()
       end
     else
