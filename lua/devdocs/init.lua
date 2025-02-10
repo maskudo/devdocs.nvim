@@ -31,18 +31,18 @@ local function downloadDocs(ensureInstalled)
   end
 
   local extractJob
-  extractJob = coroutine.create(function()
-    for i, doc in ipairs(extractList) do
+  extractJob = coroutine.create(function(toExtract)
+    for i, doc in ipairs(toExtract) do
       print('Extracting DevDocs for ' .. doc)
       D.ExtractDocs(doc, function()
         print('Docs for ' .. doc .. ' extracted successfully')
         if coroutine.status(extractJob) ~= 'dead' then
           vim.defer_fn(function()
-            coroutine.resume(extractJob)
+            coroutine.resume(extractJob, toExtract)
           end, 0)
         end
       end)
-      if i == #extractList then
+      if i == #toExtract then
         return
       end
       coroutine.yield()
@@ -55,21 +55,21 @@ local function downloadDocs(ensureInstalled)
       print('Downloading DevDocs for ' .. doc)
       D.DownloadDocs(doc, function()
         table.insert(extractList, doc)
-        print('Docs for ' .. doc .. ' downloaded successfully')
-        if coroutine.status(downloadJob) ~= 'dead' then
-          vim.defer_fn(function()
+        vim.defer_fn(function()
+          if coroutine.status(downloadJob) ~= 'dead' then
             coroutine.resume(downloadJob)
-          end, 0)
+          end
+        end, 0)
+        -- start extracting after last download finishes
+        if i == #downloadList then
+          if coroutine.status(extractJob) ~= 'dead' then
+            vim.defer_fn(function()
+              coroutine.resume(extractJob, extractList)
+            end, 0)
+          end
+          return
         end
       end)
-      if i == #downloadList then
-        if coroutine.status(extractJob) ~= 'dead' then
-          vim.defer_fn(function()
-            coroutine.resume(extractJob)
-          end, 0)
-        end
-        return
-      end
       coroutine.yield()
     end
   end)
@@ -79,7 +79,7 @@ local function downloadDocs(ensureInstalled)
   end
   -- extract if nothing to download
   if #downloadList == 0 and #extractList > 0 and coroutine.status(extractJob) ~= 'dead' then
-    coroutine.resume(extractJob)
+    coroutine.resume(extractJob, extractList)
   end
 end
 

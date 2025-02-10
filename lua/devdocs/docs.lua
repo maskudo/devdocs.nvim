@@ -114,7 +114,7 @@ M.ExtractDocs = function(slug, onComplete)
       local htmlContent = entry.value
       local parts = vim.split(title, '/', { trimempty = true, plain = true })
       local filename = table.remove(parts, #parts) .. '.md'
-      local dir = DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+      local dir = C.DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
       local outputFile = dir .. '/' .. filename
 
       os.execute('mkdir -p ' .. dir)
