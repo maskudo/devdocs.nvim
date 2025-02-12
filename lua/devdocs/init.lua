@@ -82,7 +82,8 @@ local function downloadDocs(ensureInstalled)
   end
 end
 
-local function setupCommands(opts)
+---setup User Commands
+local function setupCommands()
   vim.api.nvim_create_user_command('DevDocs', function(opts)
     local subcmd = opts.fargs[1]
     if not subcmd then
@@ -113,7 +114,7 @@ M.setup = function(opts)
     local ensureInstalled = opts.ensure_installed or {}
     downloadDocs(ensureInstalled)
   end)
-  setupCommands(opts)
+  setupCommands()
 end
 
 return M

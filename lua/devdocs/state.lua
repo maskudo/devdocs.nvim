@@ -24,6 +24,10 @@ local function initializeState()
   M.state = state
 end
 
+---Update application state
+---@param self table
+---@param key doc
+---@param val DevdocStatus
 M.Update = function(self, key, val)
   self.state[key] = val
   local encoded = vim.json.encode(self.state)
@@ -35,6 +39,8 @@ M.Update = function(self, key, val)
   stateFile:flush()
 end
 
+---Reset application state
+---@param self table
 M.Reset = function(self)
   self.state = {}
   local encoded = vim.json.encode(self.state)
@@ -46,6 +52,10 @@ M.Reset = function(self)
   stateFile:flush()
 end
 
+---Get Docs status
+---@param self table
+---@param key doc Doc
+---@return DevdocStatus
 M.Get = function(self, key)
   return self.state[key]
 end

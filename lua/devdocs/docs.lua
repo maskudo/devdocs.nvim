@@ -1,6 +1,26 @@
 local M = {}
 local C = require('devdocs.constants')
 
+--- @class DevdocsMetadata
+--- @field db_size number Database size in bytes
+--- @field links DevdocsLinks Table containing links related to the documentation
+--- @field mtime number Last modified time (UNIX timestamp)
+--- @field name string Name of the documentation/project
+--- @field release string Version release
+--- @field slug string Unique identifier slug
+--- @field type string Type/category of the documentation
+--- @field version string Version string (can be empty)
+
+--- @class DevdocsLinks
+--- @field code string? Optional GitHub/Code repository link
+--- @field home string? Optional homepage link
+
+--- @class DevdocStatus
+--- @field downloaded boolean
+--- @field extracted boolean
+
+---@class Doc
+
 ---Initialize DevDocs directories
 M.InitializeDirectories = function()
   os.execute('mkdir -p ' .. C.DEVDOCS_DATA_DIR)
@@ -10,20 +30,28 @@ M.InitializeDirectories = function()
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
-M.InitializeMetadata = function(opts, onComplete)
+---
+
+---Initialize devdocs for metadata.
+---Downloads a list of all available docs
+---@param opts { force: boolean } | nil
+---@param callback function|nil Function called after fetching metadata
+---@return nil
+M.InitializeMetadata = function(opts, callback)
   if opts and opts.force then
-    return M.FetchDevdocsMetadata(onComplete)
+    return M.FetchDevdocsMetadata(callback)
   end
   local metadata = require('devdocs.state'):Get('metadata')
   if metadata and metadata.downloaded then
-    if onComplete ~= nil then
-      onComplete()
+    if callback ~= nil then
+      callback()
     end
   end
-  M.FetchDevdocsMetadata(onComplete)
+  M.FetchDevdocsMetadata(callback)
 end
 
 ---Fetches and stores metadata in ${DEVDOCS_DATA_DIR}/metadata.json
+---@param onComplete function|nil
 M.FetchDevdocsMetadata = function(onComplete)
   vim.system({
     'curl',
@@ -46,7 +74,7 @@ M.FetchDevdocsMetadata = function(onComplete)
 end
 
 ---Returns available dev docs
----@return table
+---@return DevdocsMetadata[]
 M.GetDownloadableDocs = function()
   local file = io.open(C.METADATA_FILE, 'r')
   if not file then
@@ -58,18 +86,10 @@ M.GetDownloadableDocs = function()
   return availableDocs
 end
 
-M.PickDocs = function()
-  local docs = M.GetDownloadableDocs()
-  local names = {}
-  for _, doc in ipairs(docs) do
-    table.insert(names, doc.slug)
-  end
-  vim.ui.select(names, { prompt = 'Select docs to install' }, function(choice)
-    print(choice)
-  end)
-end
-
-M.DownloadDocs = function(slug, onDownload)
+---Downloads json docs for any specified doc
+---@param slug string Doc to be downloaded
+---@param callback function Function called after download
+M.DownloadDocs = function(slug, callback)
   local downloadLink = 'https://documents.devdocs.io/' .. slug .. '/db.json'
   vim.system({
     'curl',
@@ -91,16 +111,15 @@ M.DownloadDocs = function(slug, onDownload)
       require('devdocs.state'):Update(slug, {
         downloaded = true,
       })
-      onDownload()
+      callback()
     end)
   end)
 end
 
-M.ShowState = function()
-  print(vim.inspect(require('devdocs.state').state))
-end
-
-M.ExtractDocs = function(slug, onComplete)
+---Extracts json docs into markdown files
+---@param slug string Doc to be extracted
+---@param callback function? Function called after extraction
+M.ExtractDocs = function(slug, callback)
   local filepath = C.DOCS_DIR .. '/' .. slug .. '.json'
 
   local activeJobs = 0
@@ -143,7 +162,9 @@ M.ExtractDocs = function(slug, onComplete)
           extracted = true,
         })
         vim.notify('Extracted Docs for ' .. slug .. 'successfully')
-        onComplete()
+        if callback ~= nil then
+          callback()
+        end
       end
     else
       vim.defer_fn(processDocs, 0)
@@ -155,6 +176,10 @@ M.ExtractDocs = function(slug, onComplete)
   end
 end
 
+---Converts html documents to a bunch of markdown files
+---@param htmlContent string
+---@param outputFile string File the output markdown is stored on
+---@param callback function Function called after conversion
 M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
   vim.system({
     'pandoc',
@@ -170,17 +195,17 @@ M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
   end)
 end
 
-M.DownloadAndExtractDocs = function(slug)
-  M.DownloadDocs(slug, function()
-    M.ExtractDocs(slug)
-  end)
-end
-
+---Get downloaded/extracted status of docs
+---@param slug string The doc
+---@return DevdocStatus {downloaded: string, extracted: string}
 M.GetDocStatus = function(slug)
   local status = require('devdocs.state'):Get(slug)
   return status
 end
 
+---Get all available docs
+--- @alias doc string
+---@return {doc: boolean}
 M.GetAvailableDocs = function()
   local availableDocs = M.GetDownloadableDocs()
   local set = {}
@@ -190,11 +215,17 @@ M.GetAvailableDocs = function()
   return set
 end
 
+---Check if doc is available for download
+---@param doc string
+---@return boolean
 M.ValidateDocAvailability = function(doc)
   local availableDocs = M.GetAvailableDocs()
   return availableDocs[doc] or false
 end
 
+---Separated provided docs into valid and invalid docs
+---@param docs doc[]
+---@return table {validDocs: string[], invalidDocs: string[]}
 M.ValidateDocsAvailability = function(docs)
   local availableDocs = M.GetAvailableDocs()
   local invalidDocs = {}
