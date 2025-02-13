@@ -50,7 +50,7 @@ M.ShowAvailableDocs = function()
   end
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
   Snacks.picker.select(items, { prompt = 'Select Doc to Download' }, function(selected)
-    D.DownloadDocs(selected)
+    D.InstallDocs(selected)
   end)
 end
 

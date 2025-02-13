@@ -94,7 +94,7 @@ local function setupCommands()
     elseif subcmd == 'install' then
       local doc = opts.fargs[2]
       if doc ~= nil then
-        D.DownloadDocs(doc)
+        D.InstallDocs(doc)
       else
         P.ShowAvailableDocs()
       end

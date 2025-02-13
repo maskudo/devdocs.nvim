@@ -90,7 +90,7 @@ end
 ---Downloads json docs for any specified doc
 ---@param slug string Doc to be downloaded
 ---@param callback function Function called after download
-M._DownloadDocs = function(slug, callback)
+M.DownloadDocs = function(slug, callback)
   local downloadLink = 'https://documents.devdocs.io/' .. slug .. '/db.json'
   vim.system({
     'curl',
@@ -179,8 +179,8 @@ end
 
 ---Downloads json docs for any specified doc
 ---@param slug doc Doc to be downloaded
-M.DownloadDocs = function(slug)
-  M._DownloadDocs(slug, function()
+M.InstallDocs = function(slug)
+  M.DownloadDocs(slug, function()
     M.ExtractDocs(slug)
   end)
 end
