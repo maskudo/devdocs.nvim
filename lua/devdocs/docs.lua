@@ -1,5 +1,6 @@
 local M = {}
 local C = require('devdocs.constants')
+local S = require('devdocs.state')
 
 --- @class DevdocsMetadata
 --- @field db_size number Database size in bytes
@@ -89,7 +90,7 @@ end
 ---Downloads json docs for any specified doc
 ---@param slug string Doc to be downloaded
 ---@param callback function Function called after download
-M.DownloadDocs = function(slug, callback)
+M._DownloadDocs = function(slug, callback)
   local downloadLink = 'https://documents.devdocs.io/' .. slug .. '/db.json'
   vim.system({
     'curl',
@@ -161,7 +162,7 @@ M.ExtractDocs = function(slug, callback)
           downloaded = true,
           extracted = true,
         })
-        vim.notify('Extracted Docs for ' .. slug .. 'successfully')
+        vim.notify('Downloaded Docs for ' .. slug .. ' successfully')
         if callback ~= nil then
           callback()
         end
@@ -174,6 +175,14 @@ M.ExtractDocs = function(slug, callback)
   for _ = 1, MAX_ACTIVE_JOBS do
     processDocs()
   end
+end
+
+---Downloads json docs for any specified doc
+---@param slug doc Doc to be downloaded
+M.DownloadDocs = function(slug)
+  M._DownloadDocs(slug, function()
+    M.ExtractDocs(slug)
+  end)
 end
 
 ---Converts html documents to a bunch of markdown files
@@ -213,6 +222,17 @@ M.GetAvailableDocs = function()
     set[doc.slug] = true
   end
   return set
+end
+
+M.GetInstalledDocs = function()
+  local state = S.state
+  local installed = {}
+  for doc, status in pairs(state) do
+    if doc ~= 'metadata' and status.extracted then
+      table.insert(installed, doc)
+    end
+  end
+  return installed
 end
 
 ---Check if doc is available for download

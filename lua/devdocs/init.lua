@@ -91,18 +91,19 @@ local function setupCommands()
     end
     if subcmd == 'fetch' then
       D.InitializeMetadata({ force = true })
-    elseif subcmd == 'install' then
+    elseif subcmd == 'download' then
       local doc = opts.fargs[2]
-      if not D.ValidateDocAvailability(doc) then
-        return vim.notify('Docs for ' .. doc .. " doesn't exist", vim.log.levels.ERROR)
+      if doc ~= nil then
+        D.DownloadDocs(doc)
+      else
+        P.ShowAvailableDocs()
       end
-      D.DownloadDocs(doc)
     elseif subcmd == 'get' then
       local doc = opts.fargs[2]
       if not doc then
-        P.PickDocs()
+        P.ViewDocs()
       else
-        P.PickDoc(doc)
+        P.ViewDoc(doc)
       end
     end
   end, { nargs = '*' })

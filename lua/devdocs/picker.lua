@@ -1,17 +1,18 @@
 local M = {}
 local C = require('devdocs.constants')
 local D = require('devdocs.docs')
-local S = require('snacks')
+local Snacks = require('snacks')
 local H = require('devdocs.helpers')
 
 ---Show list of all available docs for a DevDoc
 ---@param doc doc
 ---@param callback function?
-M.PickDoc = function(doc, callback)
-  S.picker.smart({
+M.ViewDoc = function(doc, callback)
+  Snacks.picker.smart({
     cwd = C.DOCS_DIR .. '/' .. doc,
     exclude = { '*.json' },
     format = 'text',
+    title = 'Select doc',
     transform = function(item)
       item.text = item.text:gsub('/index', '')
       item.text = item.text:gsub('/', ' ')
@@ -33,27 +34,24 @@ M.PickDoc = function(doc, callback)
   })
 end
 
-local gen_items = function(docs)
-  local items = {}
-  for _, doc in ipairs(docs) do
-    table.insert(items, { text = doc.slug, preview = { text = vim.inspect(doc) } })
-  end
-  return items
+M.ViewDocs = function()
+  local docs = D.GetInstalledDocs()
+  ---@diagnostic disable-next-line: redundant-parameter -- documentation error
+  Snacks.picker.select(docs, { prompt = 'Select Doc' }, function(selected)
+    M.ViewDoc(selected)
+  end)
 end
 
-M.PickDocs = function()
+M.ShowAvailableDocs = function()
   local docs = D.GetDownloadableDocs()
-  local items = gen_items(docs)
-  S.picker.pick({
-    source = 'devdocs',
-    items = items,
-    preview = 'preview',
-    format = 'text',
-    confirm = function(picker, item)
-      picker:close()
-      M.PickDoc(item.text)
-    end,
-  })
+  local items = {}
+  for _, doc in ipairs(docs) do
+    table.insert(items, doc.slug)
+  end
+  ---@diagnostic disable-next-line: redundant-parameter -- documentation error
+  Snacks.picker.select(items, { prompt = 'Select Doc to Download' }, function(selected)
+    D.DownloadDocs(selected)
+  end)
 end
 
 return M
