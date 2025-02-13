@@ -45,7 +45,7 @@ M.InitializeMetadata = function(opts, callback)
   local metadata = require('devdocs.state'):Get('metadata')
   if metadata and metadata.downloaded then
     if callback ~= nil then
-      callback()
+      return callback()
     end
   end
   M.FetchDevdocsMetadata(callback)
