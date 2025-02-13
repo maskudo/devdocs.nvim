@@ -91,7 +91,7 @@ local function setupCommands()
     end
     if subcmd == 'fetch' then
       D.InitializeMetadata({ force = true })
-    elseif subcmd == 'download' then
+    elseif subcmd == 'install' then
       local doc = opts.fargs[2]
       if doc ~= nil then
         D.DownloadDocs(doc)
