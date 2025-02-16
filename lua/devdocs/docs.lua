@@ -123,7 +123,7 @@ M.ExtractDocs = function(slug, callback)
   local filepath = C.DOCS_DIR .. '/' .. slug .. '.json'
 
   local activeJobs = 0
-  local MAX_ACTIVE_JOBS = 20
+  local MAX_ACTIVE_JOBS = 5
 
   local getDocsData = coroutine.create(function()
     for line in io.lines(filepath) do
