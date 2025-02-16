@@ -8,6 +8,9 @@ local H = require('devdocs.helpers')
 ---@param doc doc
 ---@param callback function?
 M.ViewDoc = function(doc, callback)
+  if not doc then
+    return
+  end
   Snacks.picker.smart({
     cwd = C.DOCS_DIR .. '/' .. doc,
     exclude = { '*.json' },
@@ -38,6 +41,9 @@ M.ViewDocs = function()
   local docs = D.GetInstalledDocs()
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
   Snacks.picker.select(docs, { prompt = 'Select Doc' }, function(selected)
+    if not selected then
+      return
+    end
     M.ViewDoc(selected)
   end)
 end
@@ -50,6 +56,9 @@ M.ShowAvailableDocs = function()
   end
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
   Snacks.picker.select(items, { prompt = 'Select Doc to Download' }, function(selected)
+    if not selected then
+      return
+    end
     D.InstallDocs(selected)
   end)
 end
