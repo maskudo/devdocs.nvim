@@ -1,6 +1,5 @@
 local M = {}
 local C = require('devdocs.constants')
-local S = require('devdocs.state')
 
 --- @class DevdocsMetadata
 --- @field db_size number Database size in bytes
@@ -225,7 +224,7 @@ M.GetAvailableDocs = function()
 end
 
 M.GetInstalledDocs = function()
-  local state = S.state
+  local state = require('devdocs.state').state
   local installed = {}
   for doc, status in pairs(state) do
     if doc ~= 'metadata' and status.extracted then
