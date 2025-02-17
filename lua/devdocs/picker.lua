@@ -1,7 +1,6 @@
 local M = {}
 local C = require('devdocs.constants')
 local D = require('devdocs.docs')
-local Snacks = require('snacks')
 local H = require('devdocs.helpers')
 
 ---Show list of all available docs for a DevDoc
@@ -11,36 +10,33 @@ M.ViewDoc = function(doc, callback)
   if not doc then
     return
   end
-  Snacks.picker.smart({
-    cwd = C.DOCS_DIR .. '/' .. doc,
-    exclude = { '*.json' },
-    format = 'text',
-    title = 'Select doc',
-    transform = function(item)
-      item.text = item.text:gsub('/index', '')
-      item.text = item.text:gsub('/', ' ')
-      item.text = item.text:gsub('.md', '')
-      item.text = H.toTitleCase(item.text)
-      return item
-    end,
-    filter = { cwd = true },
-    sort = { fields = { 'text' } },
-    confirm = function(picker)
-      local file = picker:current()._path
-      picker:close()
-      if callback == nil then
-        Snacks.win.new({ file = file, position = 'right' }):add_padding()
-      else
-        callback({ file = file })
-      end
-    end,
-  })
+  local files = vim.fs.find(function()
+    return true
+  end, { limit = math.huge, type = 'file', path = C.DOCS_DIR .. '/' .. doc })
+  local prettifiedFilenames = {}
+  for i, file in ipairs(files) do
+    local name = file
+    name = name:gsub(C.DOCS_DIR .. '/' .. doc, '')
+    name = name:gsub('/index', '')
+    name = name:gsub('/', ' ')
+    name = name:gsub('.md', '')
+    name = H.toTitleCase(name)
+    name = vim.fn.trim(name)
+    if #name == 0 then
+      name = 'Index'
+    end
+    prettifiedFilenames[i] = name
+  end
+  vim.ui.select(prettifiedFilenames, { prompt = 'Select Doc' }, function(_, index)
+    local file = files[index]
+    vim.cmd('split ' .. file .. ' | setlocal readonly')
+  end)
 end
 
 M.ViewDocs = function()
   local docs = D.GetInstalledDocs()
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
-  Snacks.picker.select(docs, { prompt = 'Select Doc' }, function(selected)
+  vim.ui.select(docs, { prompt = 'Select Doc' }, function(selected)
     if not selected then
       return
     end
@@ -55,7 +51,7 @@ M.ShowAvailableDocs = function()
     table.insert(items, doc.slug)
   end
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
-  Snacks.picker.select(items, { prompt = 'Select Doc to Download' }, function(selected)
+  vim.ui.select(items, { prompt = 'Select Doc to Download' }, function(selected)
     if not selected then
       return
     end
