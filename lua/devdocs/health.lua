@@ -10,6 +10,7 @@ M.check = function()
   vim.health.start('Devdocs tools check')
   checkhealth('curl')
   checkhealth('pandoc')
+  checkhealth('jq')
 end
 
 return M
