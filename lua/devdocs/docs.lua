@@ -1,4 +1,6 @@
+---@class Docs
 local M = {}
+
 local C = require('devdocs.constants')
 
 --- @class Devdoc
@@ -259,6 +261,19 @@ M.ValidateDocsAvailability = function(docs)
     end
   end
   return { validDocs = validDocs, invalidDocs = invalidDocs }
+end
+
+---Returns doc filepaths
+---@param doc doc
+---@return [string] | nil
+M.GetDocFiles = function(doc)
+  if not doc then
+    return nil
+  end
+  local files = vim.fs.find(function()
+    return true
+  end, { limit = math.huge, type = 'file', path = C.DOCS_DIR .. '/' .. doc })
+  return files
 end
 
 return M

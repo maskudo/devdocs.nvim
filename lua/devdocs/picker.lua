@@ -1,5 +1,6 @@
 local M = {}
 local C = require('devdocs.constants')
+---@class Docs
 local D = require('devdocs.docs')
 local H = require('devdocs.helpers')
 
@@ -7,12 +8,11 @@ local H = require('devdocs.helpers')
 ---@param doc doc
 ---@param callback function?
 M.ViewDoc = function(doc, callback)
-  if not doc then
+  local files = D.GetDocFiles(doc)
+  if not files then
+    vim.notify("Doc doesn't have associated documents", vim.log.levels.WARN)
     return
   end
-  local files = vim.fs.find(function()
-    return true
-  end, { limit = math.huge, type = 'file', path = C.DOCS_DIR .. '/' .. doc })
   local prettifiedFilenames = {}
   for i, file in ipairs(files) do
     local name = file
@@ -55,6 +55,7 @@ M.ShowAllDocs = function()
     if not selected then
       return
     end
+    vim.notify('Downloading docs for ' .. selected, vim.log.levels.INFO)
     D.InstallDocs(selected)
   end)
 end
