@@ -44,7 +44,7 @@ M.ViewDocs = function()
   end)
 end
 
-M.ShowAvailableDocs = function()
+M.ShowAllDocs = function()
   local docs = D.GetDownloadableDocs()
   local items = {}
   for _, doc in ipairs(docs) do

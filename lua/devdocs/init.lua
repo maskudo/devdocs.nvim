@@ -96,7 +96,7 @@ local function setupCommands()
       if doc ~= nil then
         D.InstallDocs(doc)
       else
-        P.ShowAvailableDocs()
+        P.ShowAllDocs()
       end
     elseif subcmd == 'get' then
       local doc = opts.fargs[2]

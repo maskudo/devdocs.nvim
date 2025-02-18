@@ -1,9 +1,9 @@
 local M = {}
 local C = require('devdocs.constants')
 
---- @class DevdocsMetadata
+--- @class Devdoc
 --- @field db_size number Database size in bytes
---- @field links DevdocsLinks Table containing links related to the documentation
+--- @field links DevdocLink Table containing links related to the documentation
 --- @field mtime number Last modified time (UNIX timestamp)
 --- @field name string Name of the documentation/project
 --- @field release string Version release
@@ -11,7 +11,7 @@ local C = require('devdocs.constants')
 --- @field type string Type/category of the documentation
 --- @field version string Version string (can be empty)
 
---- @class DevdocsLinks
+--- @class DevdocLink
 --- @field code string? Optional GitHub/Code repository link
 --- @field home string? Optional homepage link
 
@@ -74,7 +74,7 @@ M.FetchDevdocsMetadata = function(onComplete)
 end
 
 ---Returns available dev docs
----@return DevdocsMetadata[]
+---@return Devdoc[]
 M.GetDownloadableDocs = function()
   local file = io.open(C.METADATA_FILE, 'r')
   if not file then
@@ -223,6 +223,8 @@ M.GetAvailableDocs = function()
   return set
 end
 
+---Get all installed docs
+---@return {doc:doc}
 M.GetInstalledDocs = function()
   local state = require('devdocs.state').state
   local installed = {}
