@@ -1,11 +1,15 @@
 ---@class DevDocs
 local M = {}
 
+---@private
 ---@class Docs
 local D = require('devdocs.docs')
 
 local P = require('devdocs.picker')
 
+---Download docs from ensure installed docs list
+---@private
+---@param ensureInstalled {doc: doc}
 local function downloadDocs(ensureInstalled)
   local validatedDocs = D.ValidateDocsAvailability(ensureInstalled)
   local toInstall = validatedDocs.validDocs
@@ -86,7 +90,8 @@ local function downloadDocs(ensureInstalled)
   end
 end
 
----setup User Commands
+---Setup User Commands
+---@private
 local function setupCommands()
   vim.api.nvim_create_user_command('DevDocs', function(opts)
     local subcmd = opts.fargs[1]

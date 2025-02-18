@@ -1,6 +1,7 @@
 local DEVDOCS_DATA_DIR = vim.fn.stdpath('data') .. '/devdocs'
 local STATE_FILE = DEVDOCS_DATA_DIR .. '/state.json'
 
+---@class State
 local M = {}
 
 local function initializeState()
