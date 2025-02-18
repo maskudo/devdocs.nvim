@@ -1,5 +1,9 @@
+---@class DevDocs
 local M = {}
+
+---@class Docs
 local D = require('devdocs.docs')
+
 local P = require('devdocs.picker')
 
 local function downloadDocs(ensureInstalled)
@@ -116,6 +120,42 @@ M.setup = function(opts)
     downloadDocs(ensureInstalled)
   end)
   setupCommands()
+end
+
+---Get all downloadable devdocs
+---@return {doc:Devdoc}
+M.GetAllDocs = D.GetDownloadableDocs
+
+---Get all installed docs
+---@return {doc: doc}
+M.GetInstalledDocs = D.GetInstalledDocs
+
+--- Get filepaths of all documents for a doc
+--- @param doc doc
+--- @return [string] | nil
+M.GetDoc = function(doc)
+  return D.GetDocFiles(doc)
+end
+
+--- Install Doc
+--- @async
+--- @param doc doc
+M.InstallDoc = function(doc)
+  return D.InstallDocs(doc)
+end
+
+---Get download link for a doc(slug)
+---@param slug doc
+---@return string
+M.GetDownloadLinkForDoc = function(slug)
+  return D.ConstructDownloadLink(slug)
+end
+
+---Fetch devdoc metadata
+---@async
+---@param callback function | nil
+M.FetchDevdocs = function(callback)
+  D.InitializeMetadata({ force = true }, callback)
 end
 
 return M

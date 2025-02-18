@@ -88,6 +88,13 @@ M.GetDownloadableDocs = function()
   return availableDocs
 end
 
+---Constructs download link for a doc(slug)
+---@param doc doc
+---@return string
+M.ConstructDownloadLink = function(doc)
+  return 'https://documents.devdocs.io/' .. doc .. '/db.json'
+end
+
 ---Downloads json docs for any specified doc
 ---@param slug string Doc to be downloaded
 ---@param callback function Function called after download
