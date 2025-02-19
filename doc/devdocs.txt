@@ -1,0 +1,54 @@
+==============================================================================
+------------------------------------------------------------------------------
+                                                                             *M*
+                                      `M`
+Class ~
+{DevDocs}
+
+------------------------------------------------------------------------------
+                                                                  *M.GetAllDocs*
+                                 `M.GetAllDocs`
+all downloadable devdocs
+Return ~
+{doc:Devdoc}
+
+------------------------------------------------------------------------------
+                                                            *M.GetInstalledDocs*
+                              `M.GetInstalledDocs`
+all installed docs
+Return ~
+{doc: doc}
+
+------------------------------------------------------------------------------
+                                                                    *M.GetDoc()*
+                               `M.GetDoc`({doc})
+Get filepaths of all documents for a doc
+@param doc doc
+@return [string] | nil
+
+------------------------------------------------------------------------------
+                                                                *M.InstallDoc()*
+                             `M.InstallDoc`({doc})
+Install Doc
+@async
+@param doc doc
+
+------------------------------------------------------------------------------
+                                                     *M.GetDownloadLinkForDoc()*
+                       `M.GetDownloadLinkForDoc`({slug})
+download link for a doc(slug)
+Parameters ~
+{slug} doc
+Return ~
+`(string)`
+
+------------------------------------------------------------------------------
+                                                              *M.FetchDevdocs()*
+                          `M.FetchDevdocs`({callback})
+devdoc metadata
+
+Parameters ~
+{callback} `(function)` | nil
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
