@@ -27,10 +27,14 @@ M.ViewDoc = function(doc, callback)
     end
     prettifiedFilenames[i] = name
   end
-  vim.ui.select(prettifiedFilenames, { prompt = 'Select Doc' }, function(_, index)
-    local file = files[index]
-    vim.cmd('split ' .. file .. ' | setlocal readonly')
-  end)
+  vim.ui.select(
+    prettifiedFilenames,
+    { prompt = ('Select Doc' .. '( ' .. doc .. ' )') },
+    function(_, index)
+      local file = files[index]
+      vim.cmd('split ' .. file .. ' | setlocal readonly')
+    end
+  )
 end
 
 M.ViewDocs = function()
