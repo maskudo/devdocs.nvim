@@ -58,7 +58,7 @@ M.FetchDevdocsMetadata = function(onComplete)
   vim.system({
     'curl',
     '-s',
-    'https://documents.devdocs.io/docs.json',
+    'https://devdocs.io/docs.json',
     '-o',
     C.METADATA_FILE,
   }, { text = false }, function(res)
