@@ -2,6 +2,10 @@
 
 A [devdocs](https://devdocs.io) client
 
+![Select from Docs](./assets/select-doc.png)
+![Select Doc](./assets/select-doc-dom.png)
+![Selected Docs](./assets/selected-doc.png.png)
+
 ## Installation
 
 - `jq`, `curl` and `pandoc` are required dependencies
