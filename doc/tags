@@ -2,6 +2,7 @@ M	devdocs.txt	/*M*
 M.FetchDevdocs()	devdocs.txt	/*M.FetchDevdocs()*
 M.GetAllDocs	devdocs.txt	/*M.GetAllDocs*
 M.GetDoc()	devdocs.txt	/*M.GetDoc()*
+M.GetDocDir()	devdocs.txt	/*M.GetDocDir()*
 M.GetDownloadLinkForDoc()	devdocs.txt	/*M.GetDownloadLinkForDoc()*
 M.GetInstalledDocs	devdocs.txt	/*M.GetInstalledDocs*
 M.InstallDoc()	devdocs.txt	/*M.InstallDoc()*

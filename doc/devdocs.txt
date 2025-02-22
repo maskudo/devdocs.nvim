@@ -27,6 +27,13 @@ Get filepaths of all documents for a doc
 @return [string] | nil
 
 ------------------------------------------------------------------------------
+                                                                 *M.GetDocDir()*
+                              `M.GetDocDir`({doc})
+Get directory for a doc
+@param doc doc
+@return [string] | nil
+
+------------------------------------------------------------------------------
                                                                 *M.InstallDoc()*
                              `M.InstallDoc`({doc})
 Install Doc
