@@ -6,6 +6,7 @@ local M = {}
 local D = require('devdocs.docs')
 
 local P = require('devdocs.picker')
+local C = require('devdocs.constants')
 
 ---Download docs from ensure installed docs list
 ---@private
@@ -140,6 +141,13 @@ M.GetInstalledDocs = D.GetInstalledDocs
 --- @return [string] | nil
 M.GetDoc = function(doc)
   return D.GetDocFiles(doc)
+end
+
+--- Get directory for a doc
+--- @param doc doc
+--- @return [string] | nil
+M.GetDocDir = function(doc)
+  return C.DOCS_DIR .. '/' .. doc
 end
 
 --- Install Doc
