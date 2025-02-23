@@ -25,15 +25,17 @@ local C = require('devdocs.constants')
 
 ---Creates a directory using a shell command native to the platform
 ---@param dir string Directory to create
-M.Mkdir = function (dir)
+M.Mkdir = function(dir)
   os.execute('mkdir -p ' .. dir)
 end
 
 -- Update for windows
 if vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 or os.getenv('OS') == 'Windows_NT' then
-  M.Mkdir = function (dir)
+  M.Mkdir = function(dir)
     os.execute(
-      "powershell.exe -NoLogo -NonInteractive -NoProfile -Command New-Item -ErrorAction SilentlyContinue -ItemType Directory -Force -Path '" .. dir .."'"
+      "powershell.exe -NoLogo -NonInteractive -NoProfile -Command New-Item -ErrorAction SilentlyContinue -ItemType Directory -Force -Path '"
+        .. dir
+        .. "'"
     )
   end
 end
@@ -162,7 +164,10 @@ M.ExtractDocs = function(slug, callback)
       local htmlContent = entry.value
       local parts = vim.split(title, '/', { trimempty = true, plain = true })
       local filename = table.remove(parts, #parts) .. '.md'
-      local dir = C.DOCS_DIR .. '/' .. slug .. (#parts > 0 and '/' .. table.concat(parts, '/') or '')
+      local dir = C.DOCS_DIR
+        .. '/'
+        .. slug
+        .. (#parts > 0 and '/' .. table.concat(parts, '/') or '')
       local outputFile = dir .. '/' .. filename
 
       M.Mkdir(dir)
@@ -185,7 +190,7 @@ M.ExtractDocs = function(slug, callback)
           downloaded = true,
           extracted = true,
         })
-        vim.schedule(function ()
+        vim.schedule(function()
           vim.notify('Downloaded Docs for ' .. slug .. ' successfully')
         end)
         if callback ~= nil then
