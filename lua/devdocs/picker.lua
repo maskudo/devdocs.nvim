@@ -35,7 +35,7 @@ M.ViewDoc = function(doc, callback)
         return
       end
       local file = files[index]
-      vim.cmd('split ' .. file .. ' | setlocal readonly')
+      vim.cmd('split ' .. file .. ' | setlocal readonly nomodifiable nobuflisted')
       vim.diagnostic.enable(false, { bufnr = 0 })
     end
   )
