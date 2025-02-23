@@ -42,8 +42,8 @@ end
 M.InitializeDirectories = function()
   M.Mkdir(C.DEVDOCS_DATA_DIR)
   M.Mkdir(C.DOCS_DIR)
-  local dataDirExists = vim.fn.mkdir(C.DEVDOCS_DATA_DIR, 'p')
-  local docsDirExists = vim.fn.mkdir(C.DOCS_DIR, 'p')
+  local dataDirExists = vim.fn.mkdir(C.DEVDOCS_DATA_DIR, 'p') == 1
+  local docsDirExists = vim.fn.mkdir(C.DOCS_DIR, 'p') == 1
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
 end
 
