@@ -24,14 +24,14 @@ Return ~
                                `M.GetDoc`({doc})
 Get filepaths of all documents for a doc
 @param doc string
-@return [string] | nil
+@return string[] | nil
 
 ------------------------------------------------------------------------------
                                                                  *M.GetDocDir()*
                               `M.GetDocDir`({doc})
 Get directory for a doc
 @param doc string
-@return [string] | nil
+@return string | nil
 
 ------------------------------------------------------------------------------
                                                                 *M.InstallDoc()*
