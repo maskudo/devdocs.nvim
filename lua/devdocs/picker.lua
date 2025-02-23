@@ -31,6 +31,9 @@ M.ViewDoc = function(doc, callback)
     prettifiedFilenames,
     { prompt = ('Select Doc' .. '( ' .. doc .. ' )') },
     function(_, index)
+      if not index then
+        return
+      end
       local file = files[index]
       vim.cmd('split ' .. file .. ' | setlocal readonly')
       vim.diagnostic.enable(false, { bufnr = 0 })
