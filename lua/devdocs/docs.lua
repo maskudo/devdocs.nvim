@@ -23,10 +23,25 @@ local C = require('devdocs.constants')
 
 ---@class Doc
 
+---Creates a directory using a shell command native to the platform
+---@param dir string Directory to create
+M.Mkdir = function (dir)
+  os.execute('mkdir -p ' .. dir)
+end
+
+-- Update for windows
+if vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 or os.getenv('OS') == 'Windows_NT' then
+  M.Mkdir = function (dir)
+    os.execute(
+      "powershell.exe -NoLogo -NonInteractive -NoProfile -Command New-Item -ErrorAction SilentlyContinue -ItemType Directory -Force -Path '" .. dir .."'"
+    )
+  end
+end
+
 ---Initialize DevDocs directories
 M.InitializeDirectories = function()
-  os.execute('mkdir -p ' .. C.DEVDOCS_DATA_DIR)
-  os.execute('mkdir -p ' .. C.DOCS_DIR)
+  M.Mkdir(C.DEVDOCS_DATA_DIR)
+  M.Mkdir(C.DOCS_DIR)
   local dataDirExists = vim.fn.mkdir(C.DEVDOCS_DATA_DIR, 'p')
   local docsDirExists = vim.fn.mkdir(C.DOCS_DIR, 'p')
   assert(dataDirExists and docsDirExists, 'Error initializing DevDocs directories')
@@ -147,10 +162,10 @@ M.ExtractDocs = function(slug, callback)
       local htmlContent = entry.value
       local parts = vim.split(title, '/', { trimempty = true, plain = true })
       local filename = table.remove(parts, #parts) .. '.md'
-      local dir = C.DOCS_DIR .. '/' .. slug .. '/' .. table.concat(parts, '/')
+      local dir = C.DOCS_DIR .. '/' .. slug .. (#parts > 0 and '/' .. table.concat(parts, '/') or '')
       local outputFile = dir .. '/' .. filename
 
-      os.execute('mkdir -p ' .. dir)
+      M.Mkdir(dir)
       coroutine.yield({ outputFile = outputFile, htmlContent = htmlContent })
     end
   end)
@@ -170,7 +185,9 @@ M.ExtractDocs = function(slug, callback)
           downloaded = true,
           extracted = true,
         })
-        vim.notify('Downloaded Docs for ' .. slug .. ' successfully')
+        vim.schedule(function ()
+          vim.notify('Downloaded Docs for ' .. slug .. ' successfully')
+        end)
         if callback ~= nil then
           callback()
         end
@@ -272,7 +289,7 @@ end
 
 ---Returns doc filepaths
 ---@param doc doc
----@return [string] | nil
+---@return string[] | nil
 M.GetDocFiles = function(doc)
   if not doc then
     return nil
