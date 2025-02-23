@@ -138,14 +138,14 @@ M.GetInstalledDocs = D.GetInstalledDocs
 
 --- Get filepaths of all documents for a doc
 --- @param doc string
---- @return [string] | nil
+--- @return string[] | nil
 M.GetDoc = function(doc)
   return D.GetDocFiles(doc)
 end
 
 --- Get directory for a doc
 --- @param doc string
---- @return [string] | nil
+--- @return string | nil
 M.GetDocDir = function(doc)
   return C.DOCS_DIR .. '/' .. doc
 end
