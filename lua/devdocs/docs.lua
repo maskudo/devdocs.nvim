@@ -119,10 +119,15 @@ M.DownloadDocs = function(slug, callback)
   local downloadLink = M.ConstructDownloadLink(slug)
   vim.system({
     'curl',
-    '-s',
+    '-sS',
     downloadLink,
   }, { text = false }, function(res)
-    assert(res.code == 0, 'Error downloading docs')
+    if res.code ~= 0 then
+      vim.schedule(function()
+        vim.notify('Error downloading doc for ' .. slug .. ': ' .. res.stderr)
+      end)
+      return
+    end
     vim.system({
       'jq',
       '-c',
