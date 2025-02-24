@@ -56,15 +56,19 @@ M.ShowAllDocs = function()
   local docs = D.GetDownloadableDocs()
   local items = {}
   for _, doc in ipairs(docs) do
-    table.insert(items, doc.slug)
+    local text = doc.slug
+    local size_in_mb = (math.ceil(doc.db_size / (1024 * 1024)))
+    text = text .. ' (' .. size_in_mb .. 'MB)'
+    table.insert(items, text)
   end
   ---@diagnostic disable-next-line: redundant-parameter -- documentation error
-  vim.ui.select(items, { prompt = 'Select Doc to Download' }, function(selected)
-    if not selected then
+  vim.ui.select(items, { prompt = 'Select Doc to Download' }, function(_, index)
+    if not index then
       return
     end
-    vim.notify('Downloading docs for ' .. selected, vim.log.levels.INFO)
-    D.InstallDocs(selected)
+    local slug = docs[index].slug
+    vim.notify('Downloading docs for ' .. slug, vim.log.levels.INFO)
+    D.InstallDocs(slug)
   end)
 end
 
