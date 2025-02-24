@@ -116,7 +116,7 @@ end
 ---@param slug string Doc to be downloaded
 ---@param callback function Function called after download
 M.DownloadDocs = function(slug, callback)
-  local downloadLink = 'https://documents.devdocs.io/' .. slug .. '/db.json'
+  local downloadLink = M.ConstructDownloadLink(slug)
   vim.system({
     'curl',
     '-s',
