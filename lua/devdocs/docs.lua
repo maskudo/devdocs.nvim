@@ -297,6 +297,22 @@ M.ValidateDocsAvailability = function(docs)
   return { validDocs = validDocs, invalidDocs = invalidDocs }
 end
 
+M.DeleteDoc = function(doc)
+  local docFile = C.DOCS_DIR .. '/' .. doc .. '.json'
+  local docDir = C.DOCS_DIR .. '/' .. doc
+
+  local deleteExtracted = vim.fn.delete(docDir, 'rf')
+  local deleteDownloaded = vim.fn.delete(docFile)
+
+  assert(deleteExtracted == 0, 'Error deleting extracted files for ' .. doc)
+  assert(deleteDownloaded == 0, 'Error deleting downloaded files for ' .. doc)
+
+  require('devdocs.state'):Update(doc, {
+    downloaded = false,
+    extracted = false,
+  })
+end
+
 ---Returns doc filepaths
 ---@param doc doc
 ---@return string[] | nil
