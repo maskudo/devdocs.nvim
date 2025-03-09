@@ -10,14 +10,14 @@ Class ~
                                  `M.GetAllDocs`
 all downloadable devdocs
 Return ~
-{doc:Devdoc}
+`({doc:Devdoc})`
 
 ------------------------------------------------------------------------------
                                                             *M.GetInstalledDocs*
                               `M.GetInstalledDocs`
 all installed docs
 Return ~
-{doc: doc}
+`({doc: doc})`
 
 ------------------------------------------------------------------------------
                                                                     *M.GetDoc()*
@@ -41,11 +41,18 @@ Install Doc
 @param doc string
 
 ------------------------------------------------------------------------------
+                                                                 *M.DeleteDoc()*
+                              `M.DeleteDoc`({doc})
+Delete Doc
+Parameters ~
+{doc} `(string)`
+
+------------------------------------------------------------------------------
                                                      *M.GetDownloadLinkForDoc()*
                        `M.GetDownloadLinkForDoc`({slug})
 download link for a doc(slug)
 Parameters ~
-{slug} doc
+{slug} `(doc)`
 Return ~
 `(string)`
 
@@ -55,7 +62,7 @@ Return ~
 devdoc metadata
 
 Parameters ~
-{callback} `(function)` | nil
+{callback} `(function | nil)`
 
 
  vim:tw=78:ts=8:noet:ft=help:norl:
