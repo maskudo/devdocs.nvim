@@ -115,6 +115,12 @@ local function setupCommands()
       else
         P.ViewDoc(doc)
       end
+    elseif subcmd == 'delete' then
+      local doc = opts.fargs[2]
+      if doc then
+        return M.DeleteDoc(doc)
+      end
+      P.DeleteDoc()
     end
   end, { nargs = '*' })
 end
@@ -155,6 +161,12 @@ end
 --- @param doc string
 M.InstallDoc = function(doc)
   return D.InstallDocs(doc)
+end
+
+--- Delete Doc
+---@param doc string
+M.DeleteDoc = function(doc)
+  D.DeleteDoc(doc)
 end
 
 ---Get download link for a doc(slug)

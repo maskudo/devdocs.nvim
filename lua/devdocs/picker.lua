@@ -52,6 +52,17 @@ M.ViewDocs = function()
   end)
 end
 
+M.DeleteDoc = function()
+  local docs = D.GetInstalledDocs()
+  vim.ui.select(docs, { prompt = 'Select Doc to Delete' }, function(selected)
+    if not selected then
+      return
+    end
+    D.DeleteDoc(selected)
+    vim.notify('Deleted docs for ' .. selected .. ' successfully', vim.log.levels.INFO)
+  end)
+end
+
 M.ShowAllDocs = function()
   local docs = D.GetDownloadableDocs()
   local items = {}
