@@ -17,6 +17,7 @@ A [devdocs](https://devdocs.io) client
     dependencies = {
       "folke/snacks.nvim",
     },
+    cmd = { "DevDocs" },
     keys = {
       {
         "<leader>ho",
@@ -45,8 +46,14 @@ A [devdocs](https://devdocs.io) client
             Snacks.picker.files({ cwd = docDir })
           end)
         end,
-        desc = "View Devdocs",
+        desc = "Get Devdocs",
       },
+      {
+        "<leader>hd",
+        mode = "n",
+        "<cmd>DevDocs delete<cr>",
+        desc = "Delete Devdoc",
+      }
     },
     opts = {
       ensure_installed = {
@@ -71,5 +78,6 @@ A [devdocs](https://devdocs.io) client
 - `DevDocs fetch`: Fetch devdocs metadata
 - `DevDocs get <doc>`: Get all docs or get `<doc>`
 - `DevDocs install <doc>`: Show all installable doc or install `<doc>`
+- `DevDocs delete <doc>`: Delete installed doc `<doc>`
 
 ## License MIT
