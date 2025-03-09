@@ -1,4 +1,5 @@
 M	devdocs.txt	/*M*
+M.DeleteDoc()	devdocs.txt	/*M.DeleteDoc()*
 M.FetchDevdocs()	devdocs.txt	/*M.FetchDevdocs()*
 M.GetAllDocs	devdocs.txt	/*M.GetAllDocs*
 M.GetDoc()	devdocs.txt	/*M.GetDoc()*
