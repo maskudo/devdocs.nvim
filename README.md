@@ -80,4 +80,7 @@ A [devdocs](https://devdocs.io) client
 - `DevDocs install <doc>`: Show all installable doc or install `<doc>`
 - `DevDocs delete <doc>`: Delete installed doc `<doc>`
 
+> NOTE: When first run, the docs configured in `ensure_installed` will download in the background.
+> Until they are downloaded and unpacked initially hitting <leader>hv will result in an empty selection.
+
 ## License MIT
