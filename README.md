@@ -82,7 +82,7 @@ A [devdocs](https://devdocs.io) client
 
 > [!NOTE]
 > When first run, the docs configured in `ensure_installed` will download in
-> the background. Until they are downloaded and unpacked hitting <leader>hv
+> the background. Until they are downloaded and unpacked hitting `<leader>hv`
 > will result in an empty selection.
 
 ```
