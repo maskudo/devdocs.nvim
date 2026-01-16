@@ -220,6 +220,81 @@ M.InstallDocs = function(slug)
   end)
 end
 
+local function clean_up_markdown_filter()
+  local path = vim.fn.tempname() .. '.lua'
+  local f = io.open(path, 'w')
+  if not f then
+    return nil
+  end
+  f:write([[
+    function Div(el)
+      return el.content
+    end
+
+    -- Drop empty paragraphs
+    function Para(el)
+      if #el.content == 0 then
+        return {}
+      end
+      return el
+    end
+
+    function BlockQuote(el)
+      return el
+    end
+
+    function Link(el)
+      -- If link text equals URL, keep it simple
+      if #el.content == 1 and el.content[1].text == el.target then
+        return el.target
+      end
+      return el
+    end
+
+    function Span(el)
+      return el.content
+    end
+
+    function Strong(el)
+      return pandoc.Strong(el.content)
+    end
+
+    function Emph(el)
+      return pandoc.Emph(el.content)
+    end
+
+    function Code(el)
+      return el
+    end
+
+
+    function Header(el)
+      if #el.content == 0 then
+        return {}
+      end
+      return el
+    end
+
+    function HorizontalRule(el)
+      return pandoc.HorizontalRule()
+    end
+
+
+    function BulletList(el)
+      return el
+    end
+
+    function OrderedList(el)
+      return el
+    end
+
+  ]])
+  f:close()
+  return path
+end
+
+local temp_filter = clean_up_markdown_filter()
+
 ---Converts html documents to a bunch of markdown files
 ---@param htmlContent string
 ---@param outputFile string File the output markdown is stored on
@@ -230,7 +305,8 @@ M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
     '-f',
     'html',
     '-t',
-    'markdown',
+    'gfm',
+    temp_filter and '--lua-filter=' .. temp_filter or '',
     '-o',
     outputFile,
   }, { stdin = htmlContent }, function(res)
