@@ -246,7 +246,7 @@ local function clean_up_markdown_filter()
     function Link(el)
       -- If link text equals URL, keep it simple
       if #el.content == 1 and el.content[1].text == el.target then
-        return el.target
+        return pandoc.Str(el.target)
       end
       return el
     end
@@ -300,18 +300,19 @@ local temp_filter = clean_up_markdown_filter()
 ---@param outputFile string File the output markdown is stored on
 ---@param callback function Function called after conversion
 M.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)
-  vim.system({
-    'pandoc',
-    '-f',
-    'html',
-    '-t',
-    'gfm',
-    temp_filter and '--lua-filter=' .. temp_filter or '',
-    '-o',
-    outputFile,
-  }, { stdin = htmlContent }, function(res)
+  local cmd = { 'pandoc', '-f', 'html', '-t', 'gfm' }
+  if temp_filter then
+    table.insert(cmd, '--lua-filter=' .. temp_filter)
+  end
+  table.insert(cmd, '-o')
+  table.insert(cmd, outputFile)
+  vim.system(cmd, { stdin = htmlContent }, function(res)
+    if res.code ~= 0 then
+      vim.schedule(function()
+        vim.notify('DevDocs pandoc error (' .. outputFile .. '): ' .. (res.stderr or 'unknown error'), vim.log.levels.WARN)
+      end)
+    end
     callback()
-    assert(res.code == 0, 'Error converting to markdown:', res.stderr)
   end)
 end
 
